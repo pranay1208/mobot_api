@@ -4,8 +4,10 @@
   "description": "The api for MoBot - Your moodle tracking bot",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node dist/app.js"
+    "start": "npm run build && node dist/app.js",
+    "scrape": "npm run build && node dist/local.js"
   },
   "author": "Pranay Agarwal",
   "license": "ISC",
