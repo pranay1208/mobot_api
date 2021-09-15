@@ -16,5 +16,6 @@ dotenv.config();
         relevantCourses: relevantCourseUrls.join(';')
     }
     const params = makeScrapeParams(req)
-    await scrapeRunner(params)
+    const result = await scrapeRunner(params)
+    console.log(result)
 })()
