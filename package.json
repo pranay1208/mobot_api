@@ -4,7 +4,8 @@
   "description": "The api for MoBot - Your moodle tracking bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node dist/app.js"
   },
   "author": "Pranay Agarwal",
   "license": "ISC",
@@ -14,6 +15,8 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@types/node": "^16.9.1",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1"
   }
 }
