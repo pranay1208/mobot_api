@@ -1,7 +1,7 @@
-import { ScrapeRequestParams, ScrapeResponseData } from "../interface";
+import { ScrapeBody, ScrapeRequestParams, ScrapeResponseData } from "../interface";
 import Constants from "./constants";
 
-export const makeScrapeParams = (body: any) : ScrapeRequestParams => {
+export const makeScrapeParams = (body: ScrapeBody) : ScrapeRequestParams => {
     const COURSE_URL_REGEX = Constants.courseRegex
     const username : string = body.username
     if(username === null || username === undefined || username === "") {
@@ -25,7 +25,7 @@ export const makeScrapeParams = (body: any) : ScrapeRequestParams => {
         const trimmedUrl = url.trim()
         const regexResult = trimmedUrl.match(COURSE_URL_REGEX)
         if(regexResult === null || regexResult[0] !== regexResult.input) {
-            console.warn("Regex mismatchh error", regexResult)
+            console.warn("Regex mismatch error", regexResult)
             throw new Error("Improperly formatted relevantCourses. Should be valid URLs delimited by ';'")
         }
         return trimmedUrl
