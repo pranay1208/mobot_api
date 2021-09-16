@@ -3,6 +3,7 @@ import {
   ScrapeRequestParams,
   ScrapeResponseData,
 } from "../interface"
+import { ScraperError } from "../utils/error"
 import Constants from "./constants"
 import MoodleScraper from "./scraper"
 
@@ -52,6 +53,14 @@ export const scrapeRunner = async (
   params: ScrapeRequestParams
 ): Promise<ScrapeResponseData> => {
   const scraper = new MoodleScraper(params)
+
+  try {
+    await scraper.login()
+  } catch (e) {
+    const err = e as ScraperError
+    console.error("Error in login", err)
+    throw err
+  }
 
   return {}
 }
