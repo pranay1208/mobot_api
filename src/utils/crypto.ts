@@ -1,15 +1,15 @@
-import NodeRSA from "node-rsa"
-import dotenv from "dotenv"
-dotenv.config()
+import NodeRSA from "node-rsa";
+import dotenv from "dotenv";
+dotenv.config();
 
-const private_key = new NodeRSA(process.env.PRIVATE_KEY)
+const private_key = new NodeRSA(process.env.PRIVATE_KEY);
 
 export const decryptText = (
   encryptedText: string | undefined
 ): string | undefined => {
   if (encryptedText === undefined) {
-    return undefined
+    return undefined;
   }
-  const decryptedText = private_key.decrypt(encryptedText, "utf8")
-  return decryptedText
-}
+  const decryptedText = private_key.decrypt(encryptedText, "utf8");
+  return decryptedText;
+};
