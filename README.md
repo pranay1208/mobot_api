@@ -17,3 +17,12 @@ Request format:
     relevantCourses: string, //';' delimited course page URLs
 }
 ```
+
+Response:
+_200_
+
+```
+{
+
+}
+```
