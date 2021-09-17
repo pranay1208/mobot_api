@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import { makeScrapeParams, scrapeRunner } from "./scrape/runner";
 import { ScrapeBody, ScrapeRequestParams } from "./interface";
 import { decryptText } from "./utils/crypto";
-import { ScraperError } from "./utils/error";
+import { INTERNAL_ERROR, ScraperError } from "./utils/error";
+import { INSPECT_MAX_BYTES } from "buffer";
 
 dotenv.config();
 
@@ -40,6 +41,9 @@ app.post("/scrape", async (req, res) => {
     res.status(200);
     res.send(responseData);
   } catch (e) {
+    if (!(e instanceof ScraperError)) {
+      e = new ScraperError(INTERNAL_ERROR);
+    }
     const err = e as ScraperError;
     console.error("Received error", err);
     res.status(err.status);
