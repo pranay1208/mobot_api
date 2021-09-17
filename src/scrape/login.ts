@@ -1,7 +1,7 @@
 import axiosInterface, { AxiosResponse } from "axios";
 import { writeFileSync } from "fs";
 import { stringify } from "qs";
-import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
+import { CRED_INVALID, ScraperError, UNEXPECTED_DATA } from "../utils/error";
 import Constants from "./constants";
 
 function generateKeyId(): string {
@@ -54,28 +54,6 @@ async function initAuthenticate(cookie: string): Promise<string[]> {
   return setCookieHeader;
 }
 
-async function getLoginPage(cookie: string): Promise<string[]> {
-  console.log("--------------- Starting getLoginPage");
-  const response: AxiosResponse<string> = await axios.get(
-    Constants.loginPageUrl,
-    {
-      headers: {
-        Cookie: cookie,
-      },
-    }
-  );
-
-  if (!response.data.includes(Constants.loginPageValidator)) {
-    console.error(
-      "Did not find the validator text inside the getLoginPage function"
-    );
-    throw new ScraperError(UNEXPECTED_DATA);
-  }
-
-  const setCookieHeader = (response.headers["set-cookie"] ?? []) as string[];
-  return setCookieHeader;
-}
-
 async function submitLoginForm(
   username: string,
   password: string,
@@ -103,21 +81,23 @@ async function submitLoginForm(
     }
   );
 
-  //TODO: Check for wrong password case
-  //TODO: Validator case
+  if (response.data.includes("Login failed")) {
+    console.warn("Typed in incorrect credentials");
+    throw new ScraperError(CRED_INVALID);
+  }
+
+  if (!response.data.includes("Login successful")) {
+    console.error("Did not receive expected validator in submitLoginForm");
+    throw new ScraperError(UNEXPECTED_DATA);
+  }
 
   const result = response.data.match(Constants.successLoginRegex);
   if (result === null) {
     console.error("Could not find success URL after login");
     throw new ScraperError(UNEXPECTED_DATA);
   }
-  const setCookieHeaderRaw = (response.headers["set-cookie"] ?? []) as string[];
+  const setCookieHeader = (response.headers["set-cookie"] ?? []) as string[];
 
-  const setCookieHeader = setCookieHeaderRaw.filter(
-    (str) => !str.includes("Domain=hkuportal.hku.hk;")
-  );
-
-  writeFileSync("submit.html", response.data);
   return {
     url: result[0],
     setCookieHeader,
@@ -147,7 +127,6 @@ async function finalLoginStep(url: string, cookie: string): Promise<string[]> {
 const LoginFunctions = {
   startLogin,
   initAuthenticate,
-  getLoginPage,
   submitLoginForm,
   finalLoginStep,
 };

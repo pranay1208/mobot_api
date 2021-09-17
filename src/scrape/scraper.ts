@@ -19,6 +19,9 @@ export default class MoodleScraper {
 
   private setCookieInterface(setCookieHeader: string[], domain: string) {
     cookieParser(setCookieHeader).forEach((cookie) => {
+      if (cookie.domain !== CookieHandler.UNSET) {
+        domain = cookie.domain;
+      }
       this.cookieHandler.setCookie(domain, cookie.name, cookie.value);
     });
   }
@@ -42,16 +45,6 @@ export default class MoodleScraper {
       throw err;
     }
 
-    try {
-      const setCookieHeader = await LoginFunctions.getLoginPage(
-        this.cookieHandler.getCookie(CookieHandler.PORTAL_DOMAIN)
-      );
-      this.setCookieInterface(setCookieHeader, CookieHandler.PORTAL_DOMAIN);
-    } catch (err) {
-      console.error("Failed getting login page");
-      throw err;
-    }
-
     let url: string;
     try {
       const result = await LoginFunctions.submitLoginForm(
@@ -72,7 +65,6 @@ export default class MoodleScraper {
     console.log(url);
     const cookies = this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN);
     console.log(`${cookies}`);
-
     // const response = await axios.get("https://moodle.hku.hk" + url.slice(21), {
     //   headers: {
     //     Cookie: cookies,
@@ -82,15 +74,15 @@ export default class MoodleScraper {
     // console.log({ ...response, data: "" });
     // writeFileSync("final.html", response.data);
 
-    // try {
-    //   const setCookieHeader = await LoginFunctions.finalLoginStep(
-    //     url,
-    //     this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN)
-    //   );
-    //   this.setCookieInterface(setCookieHeader, CookieHandler.MOODLE_DOMAIN);
-    // } catch (err) {
-    //   console.error("Error completing login", err);
-    //   throw err;
-    // }
+    try {
+      const setCookieHeader = await LoginFunctions.finalLoginStep(
+        url,
+        this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN)
+      );
+      this.setCookieInterface(setCookieHeader, CookieHandler.MOODLE_DOMAIN);
+    } catch (err) {
+      console.error("Error completing login", err);
+      throw err;
+    }
   }
 }

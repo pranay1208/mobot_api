@@ -14,14 +14,18 @@ export class CookieHandler {
   public getCookie(domain: string): string {
     const cookiesInDomain: CookieData[] = [];
     for (const key in this.cookieJar) {
+      //can just do key.endsWith because key is structured as name|domain
       if (
-        this.cookieJar[key].domain === domain ||
+        domain.endsWith(this.cookieJar[key].domain) ||
         domain === CookieHandler.ALL_DOMAINS
       ) {
         cookiesInDomain.push(this.cookieJar[key]);
       }
     }
-    return cookiesInDomain.map((ck) => `${ck.name}=${ck.value}`).join("; ");
+    const cookiesToReturn = cookiesInDomain
+      .map((ck) => `${ck.name}=${ck.value}`)
+      .join("; ");
+    return cookiesToReturn;
   }
 
   public setCookie(domain: string, name: string, value: string): void {
@@ -50,16 +54,22 @@ export class CookieHandler {
 export const cookieParser = (setCookieHeader: string[]): CookieData[] => {
   const cookieData: CookieData[] = [];
   for (const cookie of setCookieHeader) {
-    const relevantPortion = cookie.slice(0, cookie.indexOf(";"));
+    const components = cookie.split("; ");
+
+    let domain = CookieHandler.UNSET;
+    components.forEach((val) => {
+      if (val.startsWith("Domain=")) {
+        domain = val.slice(7);
+        return;
+      }
+    });
+
+    const relevantPortion = components[0];
     const nameValSeparator = relevantPortion.indexOf("=");
     const name = relevantPortion.slice(0, nameValSeparator);
     const value = relevantPortion.slice(nameValSeparator + 1);
 
-    cookieData.push({
-      name,
-      value,
-      domain: CookieHandler.UNSET,
-    });
+    cookieData.push({ name, value, domain });
   }
   return cookieData;
 };
