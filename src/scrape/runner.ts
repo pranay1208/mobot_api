@@ -62,5 +62,14 @@ export const scrapeRunner = async (
     throw err;
   }
 
+  try {
+    console.log("Now trying to get all assignments");
+  } catch (err) {
+    console.log("Error while getting all assignments");
+    throw err;
+  } finally {
+    await scraper.end();
+  }
+
   return {};
 };
