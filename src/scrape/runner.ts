@@ -62,5 +62,7 @@ export const scrapeRunner = async (
     throw err;
   }
 
+  //rest of functions should be try-catched with a "end()" in finally
+
   return {};
 };

@@ -1,14 +1,20 @@
 import axios from "axios";
-import { writeFileSync } from "fs";
 import { ScrapeRequestParams } from "../interface";
 import { CookieHandler, cookieParser } from "../utils/cookie";
-import LoginFunctions from "./login";
+
+import puppeteer from "puppeteer";
+import Constants from "./constants";
+import { CRED_INVALID, ScraperError, TIMED_OUT } from "../utils/error";
 
 export default class MoodleScraper {
   private cookieHandler: CookieHandler;
+  cookies!: string;
   private courseUrlList: string[];
   private username: string;
   private password: string;
+
+  browser: puppeteer.Browser;
+  page: puppeteer.Page;
 
   constructor(params: ScrapeRequestParams) {
     this.cookieHandler = new CookieHandler();
@@ -17,72 +23,35 @@ export default class MoodleScraper {
     this.password = params.password;
   }
 
-  private setCookieInterface(setCookieHeader: string[], domain: string) {
-    cookieParser(setCookieHeader).forEach((cookie) => {
-      if (cookie.domain !== CookieHandler.UNSET) {
-        domain = cookie.domain;
-      }
-      this.cookieHandler.setCookie(domain, cookie.name, cookie.value);
-    });
-  }
-
   async login() {
+    this.browser = await puppeteer.launch();
+    this.page = await this.browser.newPage();
+    const page = this.page;
+    await page.goto(Constants.loginPageUrl, { waitUntil: "networkidle0" });
+    await page.type("#username", this.username);
+    await page.type("#password", this.password);
+    await page.keyboard.press("Enter");
+
+    let loginResult: puppeteer.ElementHandle<Element>;
     try {
-      const setCookieHeader = await LoginFunctions.startLogin();
-      this.setCookieInterface(setCookieHeader, CookieHandler.MOODLE_DOMAIN);
+      loginResult = await Promise.race([
+        page.waitForSelector("div.loginerror", { timeout: 5000 }),
+        page.waitForSelector("#page"),
+      ]);
     } catch (err) {
-      console.error("Failed set up step", err);
-      throw err;
+      console.error("Time out after clicking login");
+      throw new ScraperError(TIMED_OUT);
     }
 
-    try {
-      const setCookieHeader = await LoginFunctions.initAuthenticate(
-        this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN)
-      );
-      this.setCookieInterface(setCookieHeader, CookieHandler.PORTAL_DOMAIN);
-    } catch (err) {
-      console.error("Failed inititating authentication");
-      throw err;
+    const classHandle = await loginResult.getProperty("className");
+    const className = await classHandle.jsonValue();
+    if (className === "loginerror") {
+      console.warn("Entered incorrect credenticals");
+      throw new ScraperError(CRED_INVALID);
     }
 
-    let url: string;
-    try {
-      const result = await LoginFunctions.submitLoginForm(
-        this.username,
-        this.password,
-        this.cookieHandler.getCookie(CookieHandler.PORTAL_DOMAIN)
-      );
-      this.setCookieInterface(
-        result.setCookieHeader,
-        CookieHandler.PORTAL_DOMAIN
-      );
-      url = result.url;
-    } catch (err) {
-      console.warn("Error while submitting login credentials");
-      throw err;
-    }
-
-    console.log(url);
-    const cookies = this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN);
-    console.log(`${cookies}`);
-    // const response = await axios.get("https://moodle.hku.hk" + url.slice(21), {
-    //   headers: {
-    //     Cookie: cookies,
-    //     Host: "moodle.hku.hk",
-    //   },
-    // });
-    // console.log({ ...response, data: "" });
-    // writeFileSync("final.html", response.data);
-
-    try {
-      const setCookieHeader = await LoginFunctions.finalLoginStep(
-        url,
-        this.cookieHandler.getCookie(CookieHandler.MOODLE_DOMAIN)
-      );
-      this.setCookieInterface(setCookieHeader, CookieHandler.MOODLE_DOMAIN);
-    } catch (err) {
-      console.error("Error completing login", err);
-      throw err;
-    }
+    this.cookies = (await page.cookies())
+      .map((ck) => `${ck.name}=${ck.value}`)
+      .join("; ");
   }
 }

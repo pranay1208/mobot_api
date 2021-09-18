@@ -35,4 +35,10 @@ export const UNEXPECTED_DATA: ScraperErrorType = {
   message:
     "We've received some unexpected data, and are working on fixing this. Please try again in a while",
 };
+
+export const TIMED_OUT: ScraperErrorType = {
+  name: "Request Timeout",
+  status: 500,
+  message: "HKU Moodle did not respond",
+};
 // add more errors here
