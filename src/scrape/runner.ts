@@ -62,7 +62,14 @@ export const scrapeRunner = async (
     throw err;
   }
 
-  //rest of functions should be try-catched with a "end()" in finally
+  try {
+    console.log("Now trying to get all assignments");
+  } catch (err) {
+    console.log("Error while getting all assignments");
+    throw err;
+  } finally {
+    await scraper.end();
+  }
 
   return {};
 };

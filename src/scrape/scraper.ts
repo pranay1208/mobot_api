@@ -1,13 +1,16 @@
 import axios from "axios";
 import { ScrapeRequestParams } from "../interface";
-import { CookieHandler, cookieParser } from "../utils/cookie";
 
 import puppeteer from "puppeteer";
 import Constants from "./constants";
-import { CRED_INVALID, ScraperError, TIMED_OUT } from "../utils/error";
+import {
+  CRED_INVALID,
+  INTERNAL_ERROR,
+  ScraperError,
+  TIMED_OUT,
+} from "../utils/error";
 
 export default class MoodleScraper {
-  private cookieHandler: CookieHandler;
   cookies!: string;
   private courseUrlList: string[];
   private username: string;
@@ -17,10 +20,20 @@ export default class MoodleScraper {
   page: puppeteer.Page;
 
   constructor(params: ScrapeRequestParams) {
-    this.cookieHandler = new CookieHandler();
     this.courseUrlList = params.relevantCourseList;
     this.username = params.username;
     this.password = params.password;
+  }
+
+  async end() {
+    if (this.browser === undefined || this.page === undefined) {
+      console.error("Browser or page is undefined");
+      throw new ScraperError(INTERNAL_ERROR);
+    }
+
+    await this.page.click(Constants.logoutSelector);
+    await this.page.waitForNavigation();
+    await this.browser.close();
   }
 
   async login() {
