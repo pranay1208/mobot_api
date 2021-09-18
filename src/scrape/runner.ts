@@ -62,8 +62,11 @@ export const scrapeRunner = async (
     throw err;
   }
 
+  console.log("Finished logging in, now looking at courses");
+
+  let response: Record<string, ScrapeResponseData>;
   try {
-    console.log("Now trying to get all assignments");
+    response = await scraper.getAssignments();
   } catch (err) {
     console.log("Error while getting all assignments");
     throw err;
@@ -71,5 +74,5 @@ export const scrapeRunner = async (
     await scraper.end();
   }
 
-  return {};
+  return response;
 };

@@ -10,6 +10,7 @@ const Constants = {
 
   //SELECTORS
   logoutSelector: "#actionmenuaction-6",
+  assignmentsSelector: ".modtype_assign, .modtype_turnitintooltwo",
 };
 
 export default Constants;
