@@ -53,11 +53,12 @@ export const scrapeRunner = async (
   params: ScrapeRequestParams
 ): Promise<ScrapeResponseData> => {
   const scraper = new MoodleScraper(params);
-
+  console.log("Processing request");
   try {
     await scraper.login();
   } catch (e) {
     const err = e as ScraperError;
+    await scraper.browser.close();
     console.error("Error in login", err);
     throw err;
   }

@@ -9,7 +9,10 @@ const Constants = {
     "https://hkuportal.hku.hk/cas/login?service=https%3A%2F%2Fmoodle.hku.hk%2Flogin%2Findex.php%3FauthCAS%3DCAS",
 
   //SELECTORS
+  logoutDropDownSelector: "#action-menu-toggle-0",
   logoutSelector: "#actionmenuaction-6",
+  logoutSuccessSelector: 'a[href="https://moodle.hku.hk/login/index.php"]',
+
   assignmentsSelector: ".modtype_assign, .modtype_turnitintooltwo",
 };
 

@@ -31,15 +31,21 @@ export default class MoodleScraper {
       console.error("Browser or page is undefined");
       throw new ScraperError(INTERNAL_ERROR);
     }
-
+    console.log("Ending session");
+    await this.page.click(Constants.logoutDropDownSelector);
     await this.page.click(Constants.logoutSelector);
-    await this.page.waitForNavigation();
+    await this.page.waitForSelector(Constants.logoutSuccessSelector, {
+      timeout: 3000,
+    });
     await this.browser.close();
   }
 
   async login() {
     this.browser = await puppeteer.launch();
     this.page = await this.browser.newPage();
+
+    console.log("Starting login");
+
     const page = this.page;
     await page.goto(Constants.loginPageUrl, { waitUntil: "networkidle0" });
     await page.type("#username", this.username);
@@ -79,9 +85,7 @@ export default class MoodleScraper {
       promiseCallsForAssignments.push(this.courseAction(url));
     }
 
-    console.log(this.courseUrlList.length);
     const listOfResponses = await Promise.all(promiseCallsForAssignments);
-    console.log(listOfResponses);
     if (listOfResponses.length !== this.courseUrlList.length) {
       console.error(
         `Response length ${listOfResponses.length}, but courseUrl length ${this.courseUrlList.length}`
