@@ -8,6 +8,8 @@ Responds with public key for now. Soon to change
 
 ## POST /scrape
 
+If a resource's completion tickbox is checked, we will not return it to conserver resources and optimise speed
+
 Request format:
 
 ```
