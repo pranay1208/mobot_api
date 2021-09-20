@@ -17,6 +17,9 @@ dotenv.config();
     relevantCourses: relevantCourseUrls.join(";"),
   };
   const params = makeScrapeParams(req);
+  // const startTime = Date.now();
   const result = await scrapeRunner(params);
+  // const endTime = Date.now();
   console.log(result);
+  // console.log(endTime - startTime);
 })();

@@ -33,6 +33,7 @@ export default class MoodleScraper {
     }
     console.log("Ending session");
     await this.page.click(Constants.logoutDropDownSelector);
+    await this.page.waitForTimeout(500); // to allow for dropdown to transition properly
     await this.page.click(Constants.logoutSelector);
     await this.page.waitForSelector(Constants.logoutSuccessSelector, {
       timeout: 3000,
@@ -41,7 +42,7 @@ export default class MoodleScraper {
   }
 
   async login() {
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({ headless: true });
     this.page = await this.browser.newPage();
 
     console.log("Starting login");
@@ -90,7 +91,6 @@ export default class MoodleScraper {
       );
       throw new ScraperError(INTERNAL_ERROR);
     }
-
     const finalList: ScrapeResponseData[] = [];
     listOfResponses.forEach((responses) => finalList.push(...responses));
 
@@ -110,6 +110,8 @@ export default class MoodleScraper {
       throw new ScraperError(INTERNAL_ERROR);
     }
     const courseScraper = new CourseScraper(coursePageResponse.data, url);
-    return [];
+    courseScraper.run();
+    //TODO: Initiate Follow ups
+    return courseScraper.getListOfResources();
   }
 }

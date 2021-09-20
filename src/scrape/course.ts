@@ -27,15 +27,13 @@ export class CourseScraper {
     }
 
     sections.each((index, section) => {
-      console.log(`Looking at section ${index} in ${this.courseUrl}`);
-        try {
-          this.sectionExtractor(section);
-        } catch (err) {
-          const error = err as ScraperError;
-          error.message += "\n found in " + this.courseUrl;
-          throw error;
-        }
-
+      try {
+        this.sectionExtractor(section);
+      } catch (err) {
+        const error = err as ScraperError;
+        error.message += "\n found in " + this.courseUrl;
+        throw error;
+      }
     });
   }
 
