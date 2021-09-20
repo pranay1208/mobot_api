@@ -1,7 +1,7 @@
-import axios from "axios";
-import { ScrapeRequestParams } from "../interface";
-
+import axios, { AxiosResponse } from "axios";
 import puppeteer from "puppeteer";
+
+import { ScrapeRequestParams, ScrapeResponseData } from "../interface";
 import Constants from "./constants";
 import {
   CRED_INVALID,
@@ -9,6 +9,7 @@ import {
   ScraperError,
   TIMED_OUT,
 } from "../utils/error";
+import { CourseScraper } from "./course";
 
 export default class MoodleScraper {
   cookies!: string;
@@ -30,15 +31,21 @@ export default class MoodleScraper {
       console.error("Browser or page is undefined");
       throw new ScraperError(INTERNAL_ERROR);
     }
-
+    console.log("Ending session");
+    await this.page.click(Constants.logoutDropDownSelector);
     await this.page.click(Constants.logoutSelector);
-    await this.page.waitForNavigation();
+    await this.page.waitForSelector(Constants.logoutSuccessSelector, {
+      timeout: 3000,
+    });
     await this.browser.close();
   }
 
   async login() {
     this.browser = await puppeteer.launch();
     this.page = await this.browser.newPage();
+
+    console.log("Starting login");
+
     const page = this.page;
     await page.goto(Constants.loginPageUrl, { waitUntil: "networkidle0" });
     await page.type("#username", this.username);
@@ -66,5 +73,43 @@ export default class MoodleScraper {
     this.cookies = (await page.cookies())
       .map((ck) => `${ck.name}=${ck.value}`)
       .join("; ");
+
+    return;
+  }
+
+  async getResources(): Promise<ScrapeResponseData[]> {
+    const promiseCallsForAssignments: Promise<ScrapeResponseData[]>[] = [];
+    for (const url of this.courseUrlList) {
+      promiseCallsForAssignments.push(this.courseAction(url));
+    }
+
+    const listOfResponses = await Promise.all(promiseCallsForAssignments);
+    if (listOfResponses.length !== this.courseUrlList.length) {
+      console.error(
+        `Response length ${listOfResponses.length}, but courseUrl length ${this.courseUrlList.length}`
+      );
+      throw new ScraperError(INTERNAL_ERROR);
+    }
+
+    const finalList: ScrapeResponseData[] = [];
+    listOfResponses.forEach((responses) => finalList.push(...responses));
+
+    return finalList;
+  }
+
+  async courseAction(url: string): Promise<ScrapeResponseData[]> {
+    let coursePageResponse: AxiosResponse<string>;
+    try {
+      coursePageResponse = await axios.get(url, {
+        headers: {
+          Cookie: this.cookies,
+        },
+      });
+    } catch (err) {
+      console.error("Recieved error from axios", err);
+      throw new ScraperError(INTERNAL_ERROR);
+    }
+    const courseScraper = new CourseScraper(coursePageResponse.data, url);
+    return [];
   }
 }

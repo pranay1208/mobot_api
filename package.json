@@ -7,7 +7,8 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && node dist/app.js",
-    "scrape": "npm run build && node dist/local.js"
+    "scrape": "npm run build && node dist/local.js",
+    "html": "npm run build && node dist/htmlTester.js"
   },
   "author": "Pranay Agarwal",
   "license": "ISC",

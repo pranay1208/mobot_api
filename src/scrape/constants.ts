@@ -4,12 +4,22 @@ const Constants = {
   successLoginRegex:
     /https?:\/\/moodle\.hku\.hk\/login\/index\.php\?authCAS=CAS&ticket=[0-9a-zA-z\-]+/,
 
-  //URLS
+  // URLS
   loginPageUrl:
     "https://hkuportal.hku.hk/cas/login?service=https%3A%2F%2Fmoodle.hku.hk%2Flogin%2Findex.php%3FauthCAS%3DCAS",
 
-  //SELECTORS
+  // LOGIN SELECTORS
+  logoutDropDownSelector: "#action-menu-toggle-0",
   logoutSelector: "#actionmenuaction-6",
+  logoutSuccessSelector: 'a[href="https://moodle.hku.hk/login/index.php"]',
+
+  // COURSE SELECTORS
+  sectionSelector: "ul[class=topics] > li",
+  sectionModuleSelector: "ul > li",
+  moduleAnchorSelector: "a[class=aalink]",
+  moduleSpanNameSelector: "form[class=togglecompletion] input[name=modulename]",
+  moduleCompletionInputSelector:
+    "form[class=togglecompletion] input[name=completionstate]",
 };
 
 export default Constants;

@@ -51,19 +51,23 @@ export const makeScrapeParams = (body: ScrapeBody): ScrapeRequestParams => {
 
 export const scrapeRunner = async (
   params: ScrapeRequestParams
-): Promise<ScrapeResponseData> => {
+): Promise<ScrapeResponseData[]> => {
   const scraper = new MoodleScraper(params);
-
+  console.log("Processing request");
   try {
     await scraper.login();
   } catch (e) {
     const err = e as ScraperError;
+    await scraper.browser.close();
     console.error("Error in login", err);
     throw err;
   }
 
+  console.log("Finished logging in, now looking at courses");
+
+  let response: ScrapeResponseData[];
   try {
-    console.log("Now trying to get all assignments");
+    response = await scraper.getResources();
   } catch (err) {
     console.log("Error while getting all assignments");
     throw err;
@@ -71,5 +75,5 @@ export const scrapeRunner = async (
     await scraper.end();
   }
 
-  return {};
+  return response;
 };

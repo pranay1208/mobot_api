@@ -10,7 +10,32 @@ export interface ScrapeRequestParams {
   relevantCourseList: string[];
 }
 
-export interface ScrapeResponseData {}
+export interface ScrapeResponseData {
+  courseUrl: string;
+  compositeId: string;
+  type: ModuleType;
+  name: string;
+  dueDate: string | null; //TODO: Decide type
+  sectionTitle: string;
+  resourceUrl: string;
+  // comments?: string;
+}
+
+export enum ModuleType {
+  ASSIGNMENT = "assign",
+  TURNITIN = "turnitintooltwo",
+  CHOICE = "choice",
+  CHOICEGROUP = "choicegroup",
+  QUIZ = "quiz",
+  RESOURCE = "resource",
+  URL = "url",
+  PAGE = "page",
+
+  UNKNOWN = "UNKNOWN TYPE",
+  //IGNORE
+  LABEL = "label",
+  FORUM = "forum",
+}
 
 export interface CookieData {
   domain: string;
