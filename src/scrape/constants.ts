@@ -16,6 +16,10 @@ const Constants = {
   // COURSE SELECTORS
   sectionSelector: "ul[class=topics] > li",
   sectionModuleSelector: "ul > li",
+  moduleAnchorSelector: "a[class=aalink]",
+  moduleSpanNameSelector: "form[class=togglecompletion] input[name=modulename]",
+  moduleCompletionInputSelector:
+    "form[class=togglecompletion] input[name=completionstate]",
 };
 
 export default Constants;

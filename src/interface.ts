@@ -17,7 +17,8 @@ export interface ScrapeResponseData {
   name: string;
   dueDate: string | null; //TODO: Decide type
   sectionTitle: string;
-  url: string;
+  resourceUrl: string;
+  // comments?: string;
 }
 
 export enum ModuleType {
@@ -26,7 +27,6 @@ export enum ModuleType {
   CHOICE = "choice",
   CHOICEGROUP = "choicegroup",
   QUIZ = "quiz",
-  FORUM = "forum",
   RESOURCE = "resource",
   URL = "url",
   PAGE = "page",
@@ -34,6 +34,7 @@ export enum ModuleType {
   UNKNOWN = "UNKNOWN TYPE",
   //IGNORE
   LABEL = "label",
+  FORUM = "forum",
 }
 
 export interface CookieData {
