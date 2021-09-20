@@ -4,7 +4,6 @@ import { makeScrapeParams, scrapeRunner } from "./scrape/runner";
 import { ScrapeBody, ScrapeRequestParams } from "./interface";
 import { decryptText } from "./utils/crypto";
 import { INTERNAL_ERROR, ScraperError } from "./utils/error";
-import { INSPECT_MAX_BYTES } from "buffer";
 
 dotenv.config();
 

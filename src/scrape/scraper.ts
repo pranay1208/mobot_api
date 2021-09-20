@@ -1,6 +1,5 @@
 import axios, { AxiosResponse } from "axios";
 import puppeteer from "puppeteer";
-import * as cheerio from "cheerio";
 
 import { ScrapeRequestParams, ScrapeResponseData } from "../interface";
 import Constants from "./constants";
@@ -10,6 +9,7 @@ import {
   ScraperError,
   TIMED_OUT,
 } from "../utils/error";
+import { CourseScraper } from "./course";
 
 export default class MoodleScraper {
   cookies!: string;
@@ -77,10 +77,8 @@ export default class MoodleScraper {
     return;
   }
 
-  async getAssignments(): Promise<Record<string, ScrapeResponseData>> {
-    const response: Record<string, ScrapeResponseData> = {};
-
-    const promiseCallsForAssignments: Promise<ScrapeResponseData>[] = [];
+  async getResources(): Promise<ScrapeResponseData[]> {
+    const promiseCallsForAssignments: Promise<ScrapeResponseData[]>[] = [];
     for (const url of this.courseUrlList) {
       promiseCallsForAssignments.push(this.courseAction(url));
     }
@@ -92,10 +90,14 @@ export default class MoodleScraper {
       );
       throw new ScraperError(INTERNAL_ERROR);
     }
-    return response;
+
+    const finalList: ScrapeResponseData[] = [];
+    listOfResponses.forEach((responses) => finalList.push(...responses));
+
+    return finalList;
   }
 
-  async courseAction(url: string): Promise<ScrapeResponseData> {
+  async courseAction(url: string): Promise<ScrapeResponseData[]> {
     let coursePageResponse: AxiosResponse<string>;
     try {
       coursePageResponse = await axios.get(url, {
@@ -107,12 +109,7 @@ export default class MoodleScraper {
       console.error("Recieved error from axios", err);
       throw new ScraperError(INTERNAL_ERROR);
     }
-
-    const $ = cheerio.load(coursePageResponse.data);
-    console.log(
-      `Found ${$(Constants.assignmentsSelector).length} assignments for ${url}`
-    );
-
-    return {};
+    const courseScraper = new CourseScraper(coursePageResponse.data, url);
+    return [];
   }
 }
