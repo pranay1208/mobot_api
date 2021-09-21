@@ -1,6 +1,6 @@
 # mobot_api
 
-API for the MoBot application which notifies you of new Moodle assignments
+API for the MoBot application which notifies you of new Moodle assignments. Currently completes a scrape in between 4 - 7 seconds with puppeteer-based login serving as the largest bottleneck
 
 ## GET /
 
@@ -8,7 +8,7 @@ Responds with public key for now. Soon to change
 
 ## POST /scrape
 
-If a resource's completion tickbox is checked, we will not return it to conserver resources and optimise speed
+If a resource's completion tickbox is checked, we will not return it to conserve resources and optimise speed
 
 Request format:
 
@@ -24,7 +24,16 @@ Response:
 _200_
 
 ```
-{
-
-}
+[
+    {
+        compositeId: string,
+        name: string,
+        courseUrl: string,
+        resourceUrl: string,
+        type: ModuleType,
+        dueDate: Date | null,
+        sectionTitle: string
+    },
+    ...
+]
 ```
