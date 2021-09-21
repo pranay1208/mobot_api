@@ -85,6 +85,7 @@ export class CourseScraper {
         case ModuleType.RESOURCE:
         case ModuleType.URL:
         case ModuleType.PAGE:
+        case ModuleType.FOLDER:
           resourceType = name;
           this.addResouceModuleData(module, title, resourceType);
           break;

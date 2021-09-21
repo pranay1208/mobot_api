@@ -30,6 +30,7 @@ export enum ModuleType {
   RESOURCE = "resource",
   URL = "url",
   PAGE = "page",
+  FOLDER = "folder",
 
   UNKNOWN = "UNKNOWN TYPE",
   //IGNORE
