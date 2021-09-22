@@ -1,4 +1,4 @@
-# mobot_api
+# MoBot
 
 API for the MoBot application which notifies you of new Moodle assignments. Currently completes a scrape in between 8-10 seconds (for 1 course) with puppeteer-based login serving as the largest bottleneck
 
