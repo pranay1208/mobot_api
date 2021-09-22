@@ -31,7 +31,7 @@ _200_
         courseUrl: string,
         resourceUrl: string,
         type: ModuleType,
-        dueDate: Date | null,
+        dueDate: string | null,
         sectionTitle: string
     },
     ...

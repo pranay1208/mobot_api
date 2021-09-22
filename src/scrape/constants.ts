@@ -20,6 +20,11 @@ const Constants = {
   moduleSpanNameSelector: "form[class=togglecompletion] input[name=modulename]",
   moduleCompletionInputSelector:
     "form[class=togglecompletion] input[name=completionstate]",
+
+  //DUE_DATE SELECTORS
+  assignmentTrSelector: "table.generaltable tr",
+  turnitinDueDateSelector:
+    "table.mod_turnitintooltwo_part_details tbody tr:nth-child(1) td:nth-child(3)",
 };
 
 export default Constants;

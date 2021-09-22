@@ -111,7 +111,7 @@ export default class MoodleScraper {
     }
     const courseScraper = new CourseScraper(coursePageResponse.data, url);
     courseScraper.run();
-    //TODO: Initiate Follow ups
+    await courseScraper.runFollowUps(this.cookies);
     return courseScraper.getListOfResources();
   }
 }
