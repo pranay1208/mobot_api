@@ -158,7 +158,6 @@ export class CourseScraper {
     this.listOfResources.push({
       courseUrl: this.courseUrl,
       resourceUrl: url,
-      compositeId: "dummyCOMPId", //TODO: Implement
       sectionTitle: title,
       name,
       type,
@@ -180,7 +179,6 @@ export class CourseScraper {
     this.listOfFollowUps.push({
       courseUrl: this.courseUrl,
       resourceUrl: url,
-      compositeId: "dummyCOMPId",
       sectionTitle: title,
       name,
       type,

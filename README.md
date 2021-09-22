@@ -26,7 +26,6 @@ _200_
 ```
 [
     {
-        compositeId: string,
         name: string,
         courseUrl: string,
         resourceUrl: string,
