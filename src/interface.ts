@@ -12,7 +12,6 @@ export interface ScrapeRequestParams {
 
 export interface ScrapeResponseData {
   courseUrl: string;
-  compositeId: string;
   type: ModuleType;
   name: string;
   dueDate: string | null; //TODO: Decide type

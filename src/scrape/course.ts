@@ -1,17 +1,20 @@
+import axios from "axios";
 import * as cheerio from "cheerio";
 import { ModuleType, ScrapeResponseData } from "../interface";
 import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
 import Constants from "./constants";
+import { getAssignmentDueDate, getTurnitinDueDate } from "./followUpParser";
 
 export class CourseScraper {
-  cheerioApi: cheerio.CheerioAPI;
-  listOfResources: ScrapeResponseData[];
-  listOfFollowUps: string[];
+  private cheerioApi: cheerio.CheerioAPI;
+  private listOfResources: ScrapeResponseData[];
+  private listOfFollowUps: ScrapeResponseData[];
   courseUrl: string;
 
   constructor(html: string, courseUrl: string) {
     this.cheerioApi = cheerio.load(html);
     this.listOfResources = [];
+    this.listOfFollowUps = [];
     this.courseUrl = courseUrl;
   }
 
@@ -37,6 +40,22 @@ export class CourseScraper {
     });
   }
 
+  async runFollowUps(cookies: string): Promise<void> {
+    const listOfDueDatePromises: Promise<string>[] = [];
+    this.listOfFollowUps.forEach((followUp) => {
+      listOfDueDatePromises.push(
+        this.getResourceDueDate(followUp.resourceUrl, followUp.type, cookies)
+      );
+    });
+    const dueDateList: string[] = await Promise.all(listOfDueDatePromises);
+
+    dueDateList.forEach((date, index) => {
+      const followUp = this.listOfFollowUps[index];
+      followUp.dueDate = date;
+      this.listOfResources.push(followUp);
+    });
+  }
+
   private sectionExtractor(section: cheerio.Node): void {
     const $ = this.cheerioApi;
     const sectionTitle: string = this.getSectionHeader(section);
@@ -48,6 +67,29 @@ export class CourseScraper {
     sectionModules.each((index, module) => {
       this.moduleAction(module, sectionTitle);
     });
+  }
+
+  private async getResourceDueDate(
+    url: string,
+    moduleType: ModuleType,
+    cookies: string
+  ): Promise<string> {
+    let html: string;
+    try {
+      const response = await axios.get(url, { headers: { Cookie: cookies } });
+      html = response.data;
+    } catch (err) {
+      console.error(`Error while getting more data for ${url}`, err);
+      return "";
+    }
+    switch (moduleType) {
+      case ModuleType.ASSIGNMENT:
+        return getAssignmentDueDate(html);
+      case ModuleType.TURNITIN:
+        return getTurnitinDueDate(html);
+      default:
+        return "";
+    }
   }
 
   private getSectionHeader(section: cheerio.Node): string {
@@ -73,11 +115,11 @@ export class CourseScraper {
     let resourceType: ModuleType;
     classNames.split(" ").forEach((name) => {
       switch (name) {
-        //TODO: we want to look into these
+        //Follow up to get dueDate on these
         case ModuleType.ASSIGNMENT:
         case ModuleType.TURNITIN:
-        case ModuleType.QUIZ:
           resourceType = name;
+          this.addFollowUpModule(module, title, resourceType);
           break;
         //add these to listOfResources
         case ModuleType.CHOICE:
@@ -86,6 +128,7 @@ export class CourseScraper {
         case ModuleType.URL:
         case ModuleType.PAGE:
         case ModuleType.FOLDER:
+        case ModuleType.QUIZ:
           resourceType = name;
           this.addResouceModuleData(module, title, resourceType);
           break;
@@ -115,7 +158,27 @@ export class CourseScraper {
     this.listOfResources.push({
       courseUrl: this.courseUrl,
       resourceUrl: url,
-      compositeId: "dummyCOMPId", //TODO: Implement
+      sectionTitle: title,
+      name,
+      type,
+      dueDate: null,
+    });
+  }
+
+  private addFollowUpModule(
+    module: cheerio.Element,
+    title: string,
+    type: ModuleType
+  ) {
+    if (this.isModuleMarkedComplete(module)) {
+      return;
+    }
+
+    const url = this.getModuleUrl(module);
+    const name = this.getModuleName(module);
+    this.listOfFollowUps.push({
+      courseUrl: this.courseUrl,
+      resourceUrl: url,
       sectionTitle: title,
       name,
       type,
@@ -146,8 +209,12 @@ export class CourseScraper {
     const $ = this.cheerioApi;
     const nameInput = $(module).find(Constants.moduleSpanNameSelector);
     if (nameInput.length === 0) {
-      console.error("No name span found for this module!");
-      throw new ScraperError(UNEXPECTED_DATA);
+      console.warn("No name span found for this module!");
+      return $(module)
+        .find("span.instancename")
+        .text()
+        .trim()
+        .replace(/\s+/g, " ");
     }
 
     let name = nameInput.attr("value");
@@ -161,7 +228,6 @@ export class CourseScraper {
       Constants.moduleCompletionInputSelector
     );
     if (completeInput.length === 0) {
-      console.warn("Could not find completion for this module");
       return false;
     }
 

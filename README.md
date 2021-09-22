@@ -26,12 +26,11 @@ _200_
 ```
 [
     {
-        compositeId: string,
         name: string,
         courseUrl: string,
         resourceUrl: string,
         type: ModuleType,
-        dueDate: Date | null,
+        dueDate: string | null,
         sectionTitle: string
     },
     ...
