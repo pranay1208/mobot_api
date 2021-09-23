@@ -67,7 +67,7 @@ export default class MoodleScraper {
     const classHandle = await loginResult.getProperty("className");
     const className = await classHandle.jsonValue();
     if (className === "loginerror") {
-      console.warn("Entered incorrect credenticals");
+      console.warn("Entered incorrect credentials");
       throw new ScraperError(CRED_INVALID);
     }
 
@@ -111,7 +111,30 @@ export default class MoodleScraper {
     }
     const courseScraper = new CourseScraper(coursePageResponse.data, url);
     courseScraper.run();
-    await courseScraper.runFollowUps(this.cookies);
+
+    // Need to complete followups
+    const htmlPromise = courseScraper.listOfFollowUps.map((followup) =>
+      this.makeFollowUpRequest(followup.resourceUrl)
+    );
+    const assignmentHtmls = await Promise.all(htmlPromise);
+
+    courseScraper.runFollowUps(assignmentHtmls);
+
     return courseScraper.getListOfResources();
+  }
+
+  async makeFollowUpRequest(url: string): Promise<string> {
+    let html: string;
+    try {
+      const response: AxiosResponse<string> = await axios.get(url, {
+        headers: {
+          Cookie: this.cookies,
+        },
+      });
+      html = response.data;
+    } catch (err) {
+      html = "";
+    }
+    return html;
   }
 }

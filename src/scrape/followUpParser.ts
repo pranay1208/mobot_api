@@ -5,7 +5,6 @@ export const getAssignmentDueDate = (html: string): string => {
   const $ = cheerio.load(html);
   const tableRows = $(Constants.assignmentTrSelector);
   if (tableRows.length === 0) {
-    console.error("Could not find the selector element");
     return "";
   }
 
@@ -25,7 +24,6 @@ export const getTurnitinDueDate = (html: string): string => {
   const $ = cheerio.load(html);
   const td = $(Constants.turnitinDueDateSelector);
   if (td.length === 0) {
-    console.error("Could not find the selector element");
     return "";
   }
   let cleanedText = td.text().trim();

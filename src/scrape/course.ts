@@ -1,4 +1,3 @@
-import axios from "axios";
 import * as cheerio from "cheerio";
 import { ModuleType, ScrapeResponseData } from "../interface";
 import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
@@ -8,7 +7,7 @@ import { getAssignmentDueDate, getTurnitinDueDate } from "./followUpParser";
 export class CourseScraper {
   private cheerioApi: cheerio.CheerioAPI;
   private listOfResources: ScrapeResponseData[];
-  private listOfFollowUps: ScrapeResponseData[];
+  listOfFollowUps: ScrapeResponseData[];
   courseUrl: string;
 
   constructor(html: string, courseUrl: string) {
@@ -40,14 +39,10 @@ export class CourseScraper {
     });
   }
 
-  async runFollowUps(cookies: string): Promise<void> {
-    const listOfDueDatePromises: Promise<string>[] = [];
-    this.listOfFollowUps.forEach((followUp) => {
-      listOfDueDatePromises.push(
-        this.getResourceDueDate(followUp.resourceUrl, followUp.type, cookies)
-      );
+  async runFollowUps(htmls: string[]): Promise<void> {
+    const dueDateList: string[] = htmls.map((html, index) => {
+      return this.getResourceDueDate(html, this.listOfFollowUps[index].type);
     });
-    const dueDateList: string[] = await Promise.all(listOfDueDatePromises);
 
     dueDateList.forEach((date, index) => {
       const followUp = this.listOfFollowUps[index];
@@ -69,17 +64,8 @@ export class CourseScraper {
     });
   }
 
-  private async getResourceDueDate(
-    url: string,
-    moduleType: ModuleType,
-    cookies: string
-  ): Promise<string> {
-    let html: string;
-    try {
-      const response = await axios.get(url, { headers: { Cookie: cookies } });
-      html = response.data;
-    } catch (err) {
-      console.error(`Error while getting more data for ${url}`, err);
+  private getResourceDueDate(html: string, moduleType: ModuleType): string {
+    if (html === "") {
       return "";
     }
     switch (moduleType) {
@@ -121,13 +107,18 @@ export class CourseScraper {
           resourceType = name;
           this.addFollowUpModule(module, title, resourceType);
           break;
-        //add these to listOfResources
-        case ModuleType.CHOICE:
-        case ModuleType.CHOICEGROUP:
+        //Non-action items to be added to list of resources
         case ModuleType.RESOURCE:
         case ModuleType.URL:
         case ModuleType.PAGE:
         case ModuleType.FOLDER:
+          resourceType = name;
+          //TODO: Check if user cares about resource data
+          this.addResouceModuleData(module, title, resourceType);
+          break;
+        //Action items to be added to list of resources
+        case ModuleType.CHOICE:
+        case ModuleType.CHOICEGROUP:
         case ModuleType.QUIZ:
           resourceType = name;
           this.addResouceModuleData(module, title, resourceType);
@@ -209,7 +200,6 @@ export class CourseScraper {
     const $ = this.cheerioApi;
     const nameInput = $(module).find(Constants.moduleSpanNameSelector);
     if (nameInput.length === 0) {
-      console.warn("No name span found for this module!");
       return $(module)
         .find("span.instancename")
         .text()
