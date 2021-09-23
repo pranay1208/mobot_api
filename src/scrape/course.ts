@@ -144,8 +144,14 @@ export class CourseScraper {
       return;
     }
 
-    const url = this.getModuleUrl(module);
     const name = this.getModuleName(module);
+    let url: string;
+    const id = this.getModuleId(module);
+    if (id === null) {
+      url = this.getModuleUrl(module);
+    } else {
+      url = `${this.courseUrl}#${id}`;
+    }
     this.listOfResources.push({
       courseUrl: this.courseUrl,
       resourceUrl: url,
@@ -209,6 +215,15 @@ export class CourseScraper {
 
     let name = nameInput.attr("value");
     return name;
+  }
+
+  private getModuleId(module: cheerio.Element): string | null {
+    const $ = this.cheerioApi;
+    const id = $(module).attr("id");
+    if (id === null || id === undefined || id === "") {
+      return null;
+    }
+    return id;
   }
 
   private isModuleMarkedComplete(module: cheerio.Element): boolean {
