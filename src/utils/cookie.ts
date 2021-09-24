@@ -11,6 +11,14 @@ export class CookieHandler {
     this.cookieJar = {};
   }
 
+  cookieDomainSorter(c1: CookieData, c2: CookieData): number {
+    const dotFinderRegex = /\./g;
+    const dot1 = (c1.domain.match(dotFinderRegex) || []).length;
+    const dot2 = (c2.domain.match(dotFinderRegex) || []).length;
+
+    return dot1 - dot2;
+  }
+
   public getCookie(domain: string): string {
     const cookiesInDomain: CookieData[] = [];
     for (const key in this.cookieJar) {
@@ -23,6 +31,7 @@ export class CookieHandler {
       }
     }
     const cookiesToReturn = cookiesInDomain
+      .sort(this.cookieDomainSorter)
       .map((ck) => `${ck.name}=${ck.value}`)
       .join("; ");
     return cookiesToReturn;

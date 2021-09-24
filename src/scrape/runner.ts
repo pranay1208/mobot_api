@@ -58,8 +58,7 @@ export const scrapeRunner = async (
     await scraper.login();
   } catch (e) {
     const err = e as ScraperError;
-    await scraper.browser.close();
-    console.error("Error in login", err);
+    console.warn("Error in login", err);
     throw err;
   }
 

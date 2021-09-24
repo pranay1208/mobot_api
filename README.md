@@ -1,6 +1,6 @@
 # MoBot
 
-API for the MoBot application which notifies you of new Moodle assignments. Currently completes a scrape in between 8-10 seconds (for 1 course) with puppeteer-based login serving as the largest bottleneck
+API for the MoBot application which notifies you of new Moodle assignments. Currently completes a scrape in between 2-5 seconds with axios-based login
 
 ## Local Testing
 To test locally, you need to set up a .env file in the root of the folder. It should like 

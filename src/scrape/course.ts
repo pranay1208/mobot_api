@@ -4,6 +4,19 @@ import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
 import Constants from "./constants";
 import { getAssignmentDueDate, getTurnitinDueDate } from "./followUpParser";
 
+export function getLogoutBody(html: string) {
+  const $ = cheerio.load(html);
+  const input = $(Constants.logoutInputSelector);
+
+  if (input === null || input === undefined) {
+    return {};
+  }
+
+  return {
+    [input.attr("name")]: input.attr("value"),
+  };
+}
+
 export class CourseScraper {
   private cheerioApi: cheerio.CheerioAPI;
   private listOfResources: ScrapeResponseData[];
