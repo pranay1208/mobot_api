@@ -1,24 +1,17 @@
-import axios, { AxiosResponse } from "axios";
-import puppeteer from "puppeteer";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { stringify } from "qs";
 
 import { ScrapeRequestParams, ScrapeResponseData } from "../interface";
 import Constants from "./constants";
-import {
-  CRED_INVALID,
-  INTERNAL_ERROR,
-  ScraperError,
-  TIMED_OUT,
-} from "../utils/error";
-import { CourseScraper } from "./course";
+import { BAD_URL_PROVIDED, INTERNAL_ERROR, ScraperError } from "../utils/error";
+import { CourseScraper, getLogoutBody } from "./course";
+import { axiosLogin } from "./login";
 
 export default class MoodleScraper {
   cookies!: string;
   private courseUrlList: string[];
   private username: string;
   private password: string;
-
-  browser: puppeteer.Browser;
-  page: puppeteer.Page;
 
   constructor(params: ScrapeRequestParams) {
     this.courseUrlList = params.relevantCourseList;
@@ -27,55 +20,29 @@ export default class MoodleScraper {
   }
 
   async end() {
-    if (this.browser === undefined || this.page === undefined) {
-      console.error("Browser or page is undefined");
-      throw new ScraperError(INTERNAL_ERROR);
+    const startLogout: AxiosResponse<string> = await axios.get(
+      Constants.logoutInitUrl,
+      {
+        headers: {
+          Cookie: this.cookies,
+        },
+      }
+    );
+    const body = getLogoutBody(startLogout.data);
+    try {
+      await axios.post(Constants.logoutInitUrl, stringify(body), {
+        headers: {
+          Cookie: this.cookies,
+        },
+        maxRedirects: 0,
+      });
+    } finally {
+      return;
     }
-    console.log("Ending session");
-    await this.page.click(Constants.logoutDropDownSelector);
-    await this.page.waitForTimeout(500); // to allow for dropdown to transition properly
-    await this.page.click(Constants.logoutSelector);
-    await this.page.waitForSelector(Constants.logoutSuccessSelector, {
-      timeout: 3000,
-    });
-    await this.browser.close();
   }
 
   async login() {
-    this.browser = await puppeteer.launch({ headless: true });
-    this.page = await this.browser.newPage();
-
-    console.log("Starting login");
-
-    const page = this.page;
-    await page.goto(Constants.loginPageUrl, { waitUntil: "networkidle0" });
-    await page.type("#username", this.username);
-    await page.type("#password", this.password);
-    await page.keyboard.press("Enter");
-
-    let loginResult: puppeteer.ElementHandle<Element>;
-    try {
-      loginResult = await Promise.race([
-        page.waitForSelector("div.loginerror", { timeout: 5000 }),
-        page.waitForSelector("#page"),
-      ]);
-    } catch (err) {
-      console.error("Time out after clicking login");
-      throw new ScraperError(TIMED_OUT);
-    }
-
-    const classHandle = await loginResult.getProperty("className");
-    const className = await classHandle.jsonValue();
-    if (className === "loginerror") {
-      console.warn("Entered incorrect credentials");
-      throw new ScraperError(CRED_INVALID);
-    }
-
-    this.cookies = (await page.cookies())
-      .map((ck) => `${ck.name}=${ck.value}`)
-      .join("; ");
-
-    return;
+    this.cookies = await axiosLogin(this.username, this.password);
   }
 
   async getResources(): Promise<ScrapeResponseData[]> {
@@ -105,8 +72,13 @@ export default class MoodleScraper {
           Cookie: this.cookies,
         },
       });
-    } catch (err) {
-      console.error("Recieved error from axios", err);
+    } catch (e) {
+      const err = e as AxiosError;
+      console.error("Recieved error from axios", err.message);
+
+      if (err.message === "Request failed with status code 404") {
+        throw new ScraperError(BAD_URL_PROVIDED);
+      }
       throw new ScraperError(INTERNAL_ERROR);
     }
     const courseScraper = new CourseScraper(coursePageResponse.data, url);

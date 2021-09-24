@@ -16,6 +16,18 @@ export const CRED_INVALID: ScraperErrorType = {
   message: "The credentials you provided were invalid",
 };
 
+export const BAD_URL_PROVIDED: ScraperErrorType = {
+  name: "Bad URL Provided",
+  status: 400,
+  message: "One or more of the URLs provided are invalid",
+};
+
+export const LOGIN_ERROR: ScraperErrorType = {
+  name: "Login Error",
+  status: 500,
+  message: "There was an issue on our side while attempting to log in",
+};
+
 export const INTERNAL_ERROR: ScraperErrorType = {
   name: "Internal Error",
   status: 500,

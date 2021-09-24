@@ -5,13 +5,12 @@ const Constants = {
     /https?:\/\/moodle\.hku\.hk\/login\/index\.php\?authCAS=CAS&ticket=[0-9a-zA-z\-]+/,
 
   // URLS
-  loginPageUrl:
-    "https://hkuportal.hku.hk/cas/login?service=https%3A%2F%2Fmoodle.hku.hk%2Flogin%2Findex.php%3FauthCAS%3DCAS",
+  loginPostUrl:
+    "https://hkuportal.hku.hk/cas/servlet/edu.yale.its.tp.cas.servlet.Login",
 
   // LOGIN SELECTORS
-  logoutDropDownSelector: "#action-menu-toggle-0",
-  logoutSelector: "#actionmenuaction-6",
-  logoutSuccessSelector: 'a[href="https://moodle.hku.hk/login/index.php"]',
+  logoutInitUrl: "https://moodle.hku.hk/login/logout.php",
+  logoutInputSelector: "form[method=post] input",
 
   // COURSE SELECTORS
   sectionSelector: "ul[class=topics] > li",
