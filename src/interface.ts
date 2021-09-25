@@ -17,6 +17,7 @@ export interface ScrapeResponseData {
   dueDate: string | null; //TODO: Decide type
   sectionTitle: string;
   resourceUrl: string;
+  completed: boolean;
   // comments?: string;
 }
 

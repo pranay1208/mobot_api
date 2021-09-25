@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import { ModuleType, ScrapeResponseData } from "../interface";
 import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
 import Constants from "./constants";
-import { getAssignmentDueDate, getTurnitinDueDate } from "./followUpParser";
+import { getAssignmentData, getTurnitinDueDate } from "./followUpParsers";
 
 export function getLogoutBody(html: string) {
   const $ = cheerio.load(html);
@@ -53,15 +53,11 @@ export class CourseScraper {
   }
 
   async runFollowUps(htmls: string[]): Promise<void> {
-    const dueDateList: string[] = htmls.map((html, index) => {
-      return this.getResourceDueDate(html, this.listOfFollowUps[index].type);
+    const finalFollowUps: ScrapeResponseData[] = htmls.map((html, index) => {
+      return this.getResourceDueDate(html, this.listOfFollowUps[index]);
     });
 
-    dueDateList.forEach((date, index) => {
-      const followUp = this.listOfFollowUps[index];
-      followUp.dueDate = date;
-      this.listOfResources.push(followUp);
-    });
+    this.listOfResources.push(...finalFollowUps);
   }
 
   private sectionExtractor(section: cheerio.Node): void {
@@ -77,18 +73,26 @@ export class CourseScraper {
     });
   }
 
-  private getResourceDueDate(html: string, moduleType: ModuleType): string {
+  private getResourceDueDate(
+    html: string,
+    followUp: ScrapeResponseData
+  ): ScrapeResponseData {
     if (html === "") {
-      return "";
+      return followUp;
     }
-    switch (moduleType) {
+    switch (followUp.type) {
       case ModuleType.ASSIGNMENT:
-        return getAssignmentDueDate(html);
+        const assignData = getAssignmentData(html);
+        followUp.dueDate = assignData.date;
+        followUp.completed = followUp.completed || assignData.completed;
+        break;
       case ModuleType.TURNITIN:
-        return getTurnitinDueDate(html);
+        const ttinData = getTurnitinDueDate(html);
+        followUp.dueDate = ttinData as string;
       default:
-        return "";
+        console.log("Received unexpected ModuleType", followUp.type);
     }
+    return followUp;
   }
 
   private getSectionHeader(section: cheerio.Node): string {
@@ -153,9 +157,7 @@ export class CourseScraper {
     title: string,
     type: ModuleType
   ) {
-    if (this.isModuleMarkedComplete(module)) {
-      return;
-    }
+    const completed = this.isModuleMarkedComplete(module);
 
     const name = this.getModuleName(module);
     let url: string;
@@ -171,6 +173,7 @@ export class CourseScraper {
       sectionTitle: title,
       name,
       type,
+      completed,
       dueDate: null,
     });
   }
@@ -180,18 +183,22 @@ export class CourseScraper {
     title: string,
     type: ModuleType
   ) {
+    let listToPushTo = this.listOfFollowUps;
+    let completed = false;
     if (this.isModuleMarkedComplete(module)) {
-      return;
+      listToPushTo = this.listOfResources;
+      completed = true;
     }
 
     const url = this.getModuleUrl(module);
     const name = this.getModuleName(module);
-    this.listOfFollowUps.push({
+    listToPushTo.push({
       courseUrl: this.courseUrl,
       resourceUrl: url,
       sectionTitle: title,
       name,
       type,
+      completed,
       dueDate: null,
     });
   }
