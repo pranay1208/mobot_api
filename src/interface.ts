@@ -18,7 +18,7 @@ export interface ScrapeResponseData {
   sectionTitle: string;
   resourceUrl: string;
   completed: boolean;
-  // comments?: string;
+  comments: string | null;
 }
 
 export enum ModuleType {

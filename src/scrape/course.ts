@@ -158,7 +158,7 @@ export class CourseScraper {
     type: ModuleType
   ) {
     const completed = this.isModuleMarkedComplete(module);
-
+    const comments = this.getModuleComments(module);
     const name = this.getModuleName(module);
     let url: string;
     const id = this.getModuleId(module);
@@ -174,6 +174,7 @@ export class CourseScraper {
       name,
       type,
       completed,
+      comments,
       dueDate: null,
     });
   }
@@ -189,7 +190,7 @@ export class CourseScraper {
       listToPushTo = this.listOfResources;
       completed = true;
     }
-
+    const comments = this.getModuleComments(module);
     const url = this.getModuleUrl(module);
     const name = this.getModuleName(module);
     listToPushTo.push({
@@ -199,6 +200,7 @@ export class CourseScraper {
       name,
       type,
       completed,
+      comments,
       dueDate: null,
     });
   }
@@ -244,6 +246,15 @@ export class CourseScraper {
       return null;
     }
     return id;
+  }
+
+  private getModuleComments(module: cheerio.Element): string | null {
+    const $ = this.cheerioApi;
+    const commentDiv = $(module).find(Constants.moduleCommentsSelector);
+    if (commentDiv.length === 0) {
+      return null;
+    }
+    return commentDiv.text().trim().replace(/\s+/g, " ");
   }
 
   private isModuleMarkedComplete(module: cheerio.Element): boolean {

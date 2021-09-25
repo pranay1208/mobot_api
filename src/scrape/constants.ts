@@ -19,6 +19,7 @@ const Constants = {
   moduleSpanNameSelector: "form[class=togglecompletion] input[name=modulename]",
   moduleCompletionInputSelector:
     "form[class=togglecompletion] input[name=completionstate]",
+  moduleCommentsSelector: ".contentafterlink",
 
   //DUE_DATE SELECTORS
   assignmentTrSelector: "table.generaltable tr",
