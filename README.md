@@ -63,4 +63,5 @@ _200_
 ```
 
 _4XX_ : For incorrect requests made by user
+
 _5XX_ : For server/internal errors
