@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import { ModuleType, ScrapeResponseData } from "../interface";
 import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
 import Constants from "./constants";
-import { getAssignmentData, getTurnitinDueDate } from "./followUpParsers";
+import { getAssignmentData, getTurnitinData } from "./followUpParsers";
 
 export function getLogoutBody(html: string) {
   const $ = cheerio.load(html);
@@ -87,8 +87,10 @@ export class CourseScraper {
         followUp.completed = followUp.completed || assignData.completed;
         break;
       case ModuleType.TURNITIN:
-        const ttinData = getTurnitinDueDate(html);
-        followUp.dueDate = ttinData as string;
+        const ttinData = getTurnitinData(html);
+        followUp.dueDate = ttinData.date;
+        followUp.completed = followUp.completed || ttinData.completed;
+        break;
       default:
         console.log("Received unexpected ModuleType", followUp.type);
     }

@@ -21,10 +21,11 @@ const Constants = {
     "form[class=togglecompletion] input[name=completionstate]",
   moduleCommentsSelector: ".contentafterlink",
 
-  //DUE_DATE SELECTORS
+  //FOLLOW_UP SELECTORS
   assignmentTrSelector: "table.generaltable tr",
   turnitinDueDateSelector:
     "table.mod_turnitintooltwo_part_details tbody tr:nth-child(1) td:nth-child(3)",
+  turnitinCompletedSelector: "div[data-submitted='1']",
 };
 
 export default Constants;

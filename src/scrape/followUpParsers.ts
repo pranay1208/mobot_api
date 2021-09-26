@@ -1,7 +1,12 @@
 import * as cheerio from "cheerio";
 import Constants from "./constants";
 
-export const getAssignmentData = (html: string) => {
+export interface FollowUpData {
+  date: string;
+  completed: boolean;
+}
+
+export const getAssignmentData = (html: string): FollowUpData => {
   const $ = cheerio.load(html);
   const tableRows = $(Constants.assignmentTrSelector);
   let date: string = "";
@@ -29,16 +34,22 @@ export const getAssignmentData = (html: string) => {
   };
 };
 
-//TODO: getTurnitinData
-export const getTurnitinDueDate = (html: string): string => {
+export const getTurnitinData = (html: string): FollowUpData => {
   const $ = cheerio.load(html);
   const td = $(Constants.turnitinDueDateSelector);
   if (td.length === 0) {
-    return "";
+    return {
+      date: "",
+      completed: false,
+    };
   }
-  let cleanedText = td.text().trim();
+  const date = td.text();
+  const completed = $(Constants.turnitinCompletedSelector).length > 0;
   // need to remove hyphen for clean date parsing
-  return cleanedText.replace("-", "").replace(/\s+/g, " ");
+  return {
+    date: stringDeepCleanse(date).replace("-", ""),
+    completed,
+  };
 };
 
 const stringDeepCleanse = (s: string, lower = false): string => {
