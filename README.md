@@ -54,8 +54,13 @@ _200_
         resourceUrl: string,
         type: ModuleType,
         dueDate: string | null,
-        sectionTitle: string
+        sectionTitle: string,
+        completed: boolean,
+        comments: string | null
     },
     ...
 ]
 ```
+
+_4XX_ : For incorrect requests made by user
+_5XX_ : For server/internal errors
