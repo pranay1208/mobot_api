@@ -25,7 +25,7 @@ const Constants = {
   assignmentTrSelector: "table.generaltable tr",
   turnitinDueDateSelector:
     "table.mod_turnitintooltwo_part_details tbody tr:nth-child(1) td:nth-child(3)",
-  turnitinCompletedSelector: "div[data-submitted='1']",
+  turnitinCompletedSelector: ".mod_turnitintooltwo_digital_receipt",
 };
 
 export default Constants;
