@@ -4,7 +4,10 @@ import { CookieHandler, cookieParser } from "../utils/cookie";
 import { CRED_INVALID, LOGIN_ERROR, ScraperError } from "../utils/error";
 import Constants from "./constants";
 
-export async function axiosLogin(username, password): Promise<string> {
+export async function axiosLogin(
+  username: string,
+  password: string
+): Promise<string> {
   const cookieHandler = new CookieHandler();
   //Submit the form
   const postResult = await makePostReq(username, password);
@@ -65,8 +68,8 @@ const generateKeyId = () => {
 };
 
 const makePostReq = async (
-  username,
-  password
+  username: string,
+  password: string
 ): Promise<AxiosFunctionResponse> => {
   const body = {
     keyid: generateKeyId(),
@@ -90,7 +93,7 @@ const makePostReq = async (
   }
   return {
     url: result[0],
-    cookies: response.headers["set-cookie"],
+    cookies: response.headers["set-cookie"] ?? [],
   };
 };
 
@@ -107,11 +110,17 @@ const initAuthReq = async (
     });
   } catch (e) {
     const err = e as AxiosError;
+    if (err.response === undefined) {
+      console.error("No response found!");
+      throw new ScraperError(LOGIN_ERROR);
+    }
     return {
       url: err.response.headers.location,
-      cookies: err.response.headers["set-cookie"],
+      cookies: err.response.headers["set-cookie"] ?? [],
     };
   }
+  console.error("No error thrown, this is unexpected");
+  throw new ScraperError(LOGIN_ERROR);
 };
 
 const finalAuthReq = async (
@@ -131,6 +140,11 @@ const finalAuthReq = async (
       throw e;
     }
     const err = e as AxiosError;
+
+    if (err.response === undefined) {
+      console.error("No response found!");
+      throw new ScraperError(LOGIN_ERROR);
+    }
     const loc = err.response.headers.location as string;
 
     if (!loc.includes("testsession")) {
@@ -139,7 +153,7 @@ const finalAuthReq = async (
     }
 
     const returnCookie: string[] = [];
-    for (const ck of (err.response.headers["set-cookie"] as string[]) || []) {
+    for (const ck of err.response.headers["set-cookie"] as string[]) {
       if (ck.includes("MoodleSession")) {
         returnCookie.push(ck);
       }

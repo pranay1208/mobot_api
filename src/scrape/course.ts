@@ -1,3 +1,5 @@
+//* HTML scraper for the general course page
+
 import * as cheerio from "cheerio";
 import { ModuleType, ScrapeResponseData } from "../interface";
 import { ScraperError, UNEXPECTED_DATA } from "../utils/error";
@@ -12,8 +14,14 @@ export function getLogoutBody(html: string) {
     return {};
   }
 
+  const inputName = input.attr("name");
+  if (inputName === undefined) {
+    console.error("Input did not have a name");
+    throw new ScraperError(UNEXPECTED_DATA);
+  }
+
   return {
-    [input.attr("name")]: input.attr("value"),
+    [inputName]: input.attr("value"),
   };
 }
 
@@ -211,7 +219,8 @@ export class CourseScraper {
     const $ = this.cheerioApi;
     const urlElement = $(module).find(Constants.moduleAnchorSelector);
     if (urlElement.length === 0) {
-      return;
+      console.error("No url element found");
+      throw new ScraperError(UNEXPECTED_DATA);
     }
     if (urlElement.length > 1) {
       console.error("Received multiple anchors for module");
@@ -238,6 +247,10 @@ export class CourseScraper {
     }
 
     let name = nameInput.attr("value");
+    if (name === undefined) {
+      console.error("No attribute 'value' found");
+      throw new ScraperError(UNEXPECTED_DATA);
+    }
     return name;
   }
 

@@ -1,7 +1,9 @@
 import NodeRSA from "node-rsa";
 import dotenv from "dotenv";
 dotenv.config();
-
+if (process.env.PRIVATE_KEY === undefined) {
+  throw new Error(".env does not contain private key");
+}
 const private_key = new NodeRSA(process.env.PRIVATE_KEY);
 
 export const decryptText = (

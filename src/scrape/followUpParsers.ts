@@ -1,11 +1,21 @@
+//* HTML Scraper for individual module pages
+
 import * as cheerio from "cheerio";
 import Constants from "./constants";
 
+/**
+ * Provides generic followup data which typically contains the due date and completion status of modules
+ **/
 export interface FollowUpData {
   date: string;
   completed: boolean;
 }
 
+/**
+ * Gets specific information from assignment page
+ * @param html The html file for the assignment page
+ * @returns The due date and inferred completion status of the assignment
+ */
 export const getAssignmentData = (html: string): FollowUpData => {
   const $ = cheerio.load(html);
   const tableRows = $(Constants.assignmentTrSelector);
@@ -34,6 +44,11 @@ export const getAssignmentData = (html: string): FollowUpData => {
   };
 };
 
+/**
+ * Gets specific information from Turnitin page
+ * @param html The html file for the turnitin page
+ * @returns The due date and inferred completion status of the assignment
+ */
 export const getTurnitinData = (html: string): FollowUpData => {
   const $ = cheerio.load(html);
   const td = $(Constants.turnitinDueDateSelector);
@@ -52,6 +67,12 @@ export const getTurnitinData = (html: string): FollowUpData => {
   };
 };
 
+/**
+ * Clean a string by removing all double and trailing spaces from it
+ * @param s The string to clean
+ * @param lower indicates whether the returned string should be lower
+ * @returns cleaned string
+ */
 const stringDeepCleanse = (s: string, lower = false): string => {
   s = s.trim().replace(/\s+/g, " ");
   if (lower) {

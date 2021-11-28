@@ -1,4 +1,8 @@
-import { CookieData } from "../interface";
+interface CookieData {
+  domain: string;
+  name: string;
+  value: string;
+}
 
 export class CookieHandler {
   private cookieJar: Record<string, CookieData>;
