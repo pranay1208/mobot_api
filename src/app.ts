@@ -1,5 +1,4 @@
 import express from "express";
-import bodyparser from "body-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import { makeScrapeParams, scrapeRunner } from "./scrape/runner";
@@ -13,8 +12,8 @@ const app = express();
 const PORT = parseInt(process.env.PORT ?? "8080");
 
 app.use(cors());
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.status(200);
@@ -23,7 +22,8 @@ app.get("/", (req, res) => {
 
 //Endpoint to get data from Moodle
 app.post("/scrape", async (req, res) => {
-  const body = req.body;
+  const body = req.body as ScrapeBody;
+  console.log(body);
   let scrapeParams: ScrapeRequestParams;
   body.password = decryptText(body.password);
 
@@ -32,7 +32,6 @@ app.post("/scrape", async (req, res) => {
     scrapeParams = makeScrapeParams(body);
   } catch (e) {
     const err = e as Error;
-    console.log(e);
     res.status(400);
     res.send(err.message);
     return;
