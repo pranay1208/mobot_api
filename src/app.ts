@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { makeScrapeParams, scrapeRunner } from "./scrape/runner";
 import { ScrapeBody, ScrapeRequestParams } from "./interface";
-import { decryptText } from "./utils/crypto";
 import { INTERNAL_ERROR, ScraperError } from "./utils/error";
 
 dotenv.config();
@@ -23,9 +22,7 @@ app.get("/", (req, res) => {
 //Endpoint to get data from Moodle
 app.post("/scrape", async (req, res) => {
   const body = req.body as ScrapeBody;
-  console.log(body);
   let scrapeParams: ScrapeRequestParams;
-  body.password = decryptText(body.password);
 
   //validate input and convert to uniform format
   try {

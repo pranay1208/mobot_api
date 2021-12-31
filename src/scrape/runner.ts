@@ -31,7 +31,6 @@ export const makeScrapeParams = (body: ScrapeBody): ScrapeRequestParams => {
   }
 
   let listOfCourseUrls = relevantCourseUrls.split(";");
-  console.log(username, password, listOfCourseUrls);
   listOfCourseUrls = listOfCourseUrls.map((url) => {
     const trimmedUrl = url.trim();
     const regexResult = trimmedUrl.match(COURSE_URL_REGEX);

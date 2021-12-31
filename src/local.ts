@@ -14,7 +14,7 @@ dotenv.config();
   const req = {
     username: process.env.MOODLE_USERNAME,
     password: process.env.MOODLE_PASSWORD,
-    relevantCourses: relevantCourseUrls.join(";"),
+    courses: relevantCourseUrls.join(";"),
   };
   const params = makeScrapeParams(req);
   // const startTime = Date.now();
