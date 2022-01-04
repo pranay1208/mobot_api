@@ -122,7 +122,7 @@ export class CourseScraper {
     const $ = this.cheerioApi;
     const classNames = $(module).attr("class");
     if (classNames === null || classNames === undefined) {
-      console.error("Could not find class name for a module. Skipping this");
+      //this is a common case scenario where professors upload "text" and moodle marks it as a list item
       return;
     }
     let resourceType: ModuleType;
