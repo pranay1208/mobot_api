@@ -4,7 +4,8 @@
   "description": "The api for MoBot - Your moodle tracking bot",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "tsc": "tsc",
+    "build": "npm run tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && node dist/app.js",
     "scrape": "npm run build && node dist/local.js",
