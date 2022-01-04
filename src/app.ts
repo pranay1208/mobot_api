@@ -4,6 +4,7 @@ import cors from "cors";
 import { makeScrapeParams, scrapeRunner } from "./scrape/runner";
 import { ScrapeBody, ScrapeRequestParams } from "./interface";
 import { INTERNAL_ERROR, ScraperError } from "./utils/error";
+import { decryptText } from "./utils/crypto";
 
 dotenv.config();
 
@@ -15,14 +16,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
+  if (process.env.PUBLIC_KEY === undefined) {
+    res.status(500);
+    res.send("No public key in .env");
+    return;
+  }
   res.status(200);
-  res.send(process.env.PUBLIC_KEY);
+  const publicKey = Buffer.from(process.env.PUBLIC_KEY, "base64").toString(
+    "ascii"
+  );
+  res.send(publicKey);
 });
 
 //Endpoint to get data from Moodle
 app.post("/scrape", async (req, res) => {
   const body = req.body as ScrapeBody;
   let scrapeParams: ScrapeRequestParams;
+  body.password = decryptText(body.password);
 
   //validate input and convert to uniform format
   try {
