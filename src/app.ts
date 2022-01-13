@@ -32,7 +32,6 @@ app.get("/", (req, res) => {
 app.post("/scrape", async (req, res) => {
   const body = req.body as ScrapeBody;
   let scrapeParams: ScrapeRequestParams;
-  body.password = decryptText(body.password);
 
   //validate input and convert to uniform format
   try {
